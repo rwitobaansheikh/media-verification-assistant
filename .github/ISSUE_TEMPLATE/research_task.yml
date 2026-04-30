@@ -1,0 +1,33 @@
+name: Research Task
+description: Create a research brief that supports a project decision.
+title: "[Research]: "
+labels: ["area:research", "needs-research"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Research Question
+      description: What decision should this research help us make?
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Expected Output
+      description: What artifact should be produced?
+      placeholder: "A markdown brief in docs/research/..."
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Candidate Sources
+      description: List likely papers, docs, repos, datasets, experts, or search directions.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      placeholder: "- [ ] Sources are linked\n- [ ] Licenses/access constraints are noted\n- [ ] MVP recommendation is included"
+    validations:
+      required: true
+

@@ -1,0 +1,14 @@
+# Replace these commented examples with real GitHub usernames or teams
+# once the repo owner and maintainer handles are known.
+#
+# Protect repository governance files:
+# /.github/ @owner-or-team
+#
+# Suggested future ownership:
+# /docs/ @docs-owner-or-team
+# /docs/research/ @research-owner-or-team
+# /apps/web/ @frontend-owner-or-team
+# /apps/api/ @backend-owner-or-team
+# /services/model-adapters/ @ml-owner-or-team
+# /eval/ @data-eval-owner-or-team
+

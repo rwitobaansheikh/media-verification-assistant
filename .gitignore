@@ -1,0 +1,41 @@
+# Local environment
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Node and frontend builds
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Local IDE/system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Generated data, model artifacts, and uploads
+data/
+datasets/
+models/
+model_weights/
+uploads/
+artifacts/
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+# Meeting recordings, transcripts, and private planning notes
+*.m4a
+*meeting*.txt
+*Meeting*.txt
+*Brainstorm*.txt
+initial_roadmap_notes.txt
+

@@ -1,0 +1,51 @@
+name: Feature Request
+description: Propose product, engineering, documentation, or workflow work.
+title: "[Feature]: "
+labels: ["needs-triage"]
+body:
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User Story
+      description: Write this from the perspective of a user or contributor.
+      placeholder: "As a ..., I want ..., so that ..."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What should be included?
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope
+      description: What should this issue intentionally avoid?
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - product
+        - research
+        - data
+        - evaluation
+        - ml
+        - backend
+        - frontend
+        - infra
+        - docs
+        - safety
+        - not sure
+    validations:
+      required: true
+
