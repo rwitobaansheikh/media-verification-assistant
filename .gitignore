@@ -19,6 +19,7 @@ coverage/
 Thumbs.db
 .idea/
 .vscode/
+.tmp/
 
 # Generated data, model artifacts, and uploads
 data/
@@ -38,4 +39,3 @@ artifacts/
 *Meeting*.txt
 *Brainstorm*.txt
 initial_roadmap_notes.txt
-
