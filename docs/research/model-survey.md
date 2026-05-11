@@ -116,24 +116,26 @@ Primary sources he reviewed:
 - DeepFake Detection Challenge Dataset: https://arxiv.org/abs/2006.07397
 - Dessa DeepFake-Detection repo: https://github.com/dessa-oss/DeepFake-Detection
 
+General information on the datasets:
+
+- FaceForensics++ is a face-manipulation benchmark, based on 1,000 original videos pulled from youtube. The original paper considers four manipulation methods (FaceSwap, DeepFakes, Face2Face, and NeuralTextures), and contained 1.8M images from 4,000 fake videos (see section 3 of the FF paper). Subsequent revisions added the FaceShifter method to the repository and added Google's DeepFakeDetection dataset, which is based on 363 videos from paid actors (see the repository https://github.com/ondyari/FaceForensics/tree/master).
+- DeepFake Detection Challenge (DFDC) is a much larger face-manipulation benchmark, based on 100,000 videos produced by 3,426 paid actors. Videos were manipulated using the DeepFake Autoencoder (DFAE), MM/NN face swap, NTH, FSGAN, StyleGAN (see section 3.2 of the DFDC paper). The training set contains 119,154 clips, the validation set has 4,000 clips, and the private test set has 10,000 clips, all ten seconds long. For further information, see section 3.5 of the DFDC paper.
+
 Main points to carry forward:
 
 - Face-focused detector pipelines often use face extraction/cropping before classification. This matters because the detector may learn more useful face-region signals and avoid unrelated background variation.
-- Transfer learning from strong pretrained visual backbones is a recurring pattern. FaceForensics++ used XceptionNet-style classification; top DFDC challenge approaches used face detection plus large CNN backbones such as EfficientNet or Xception-family models, sometimes in ensembles.
-- Dataset diversity and augmentation are central to generalization. The FaceForensics++ results were strong within its benchmark setting, but later work such as Dessa's project emphasized that a detector trained on a fixed benchmark may fail on real-world or unseen manipulation methods.
-- DFDC is useful because it scaled the problem substantially and used consenting paid actors. The DFDC paper describes over 100,000 clips from thousands of actors and analyzes Kaggle challenge submissions.
-- The DFDC challenge results suggest that large varied datasets can improve generalization, but not that deepfake detection is solved. The paper reports that top models could generalize better than many submissions, while the overall problem remained difficult and many approaches performed near random.
+- Transfer learning from strong pretrained visual backbones is a recurring pattern. FaceForensics++ combined face extraction with an XceptionNet classifier. Top DFDC challenge approaches used face detection plus large CNN backbones such as EfficientNet or Xception-family models, sometimes in ensembles.
+- Dataset diversity and augmentation are central to generalization. Models trained on the FF++ dataset were strong within their benchmark setting, but later work such as Dessa's project emphasized that a detector trained on the FF++ benchmark may fail on real-world or unseen manipulation methods.
+- Similarly, section 2 of the DFDC paper asserts that **models trained on datasets containing 1,000 to 10,000 videos do not usually generalize to detect deepfakes in the real world.**
+- In particular, this remark applies to the models considered in the FF++ paper, and also to the models considered in some more recent papers on ViT deepfake detectors (e.g. in https://kclpure.kcl.ac.uk/portal/files/271171349/Deepfake_Image_Detection.pdf and https://creativity-ai.github.io/assets/papers/5.pdf, which trained models on Kaggle datasets with 190K and 140K images, respectively)
+- DFDC is useful because it scaled the problem substantially and used consenting paid actors. It is a third-generation dataset based on 100,000 videos, and the paper analyzes the performance of Kaggle challenge submissions.
+- The DFDC challenge results suggest that large varied datasets can improve generalization, but not that deepfake detection is solved. According to section 6.2 of the DFDC paper, the best submitted models ``achieved an average precision of 0.753 and a ROC-AUC score of 0.734, only on real videos, which demonstrates that training on the DFDC Dataset allows a
+model to generalize to real videos.''
 - Training a robust detector from scratch is probably out of scope for the first MVP. The more realistic path is to evaluate and wrap existing detectors, then build a report pipeline that can incorporate stronger models later.
-
-Refinements to keep the wording precise:
-
-- Describe FaceForensics++ as a face-manipulation benchmark with 1,000 original videos, four manipulation methods, and a much larger set of manipulated frames/images, rather than only "about 1,000 videos."
-- Describe DFDC winning-model performance using the paper's metrics, such as average precision and ROC-AUC, rather than saying simply "precision."
-- Avoid saying "with enough data, it is possible to train a model to detect deepfakes in the wild" without qualification. Prefer: "large and varied consent-based datasets can improve generalization, but detector reliability remains distribution-dependent."
-- Avoid making the MVP face-only by default. Face extraction is important if the MVP narrows to face manipulation, but the current image-first media verification direction should still support non-face generated images and provenance/metadata signals.
 
 Impact on issue #12 architecture:
 
+- Avoid making the MVP face-only by default. Face extraction is important if the MVP narrows to face manipulation, but the current image-first media verification direction should still support non-face generated images and provenance/metadata signals.
 - Add a possible face-preprocessing adapter or stage, but keep it optional.
 - Keep the model adapter boundary because face-specific detectors, general image detectors, and provenance tools will have different preprocessing assumptions.
 - Record preprocessing decisions in the report output, such as whether a face was detected/cropped, image resolution, compression or screenshot status, and which detector/checkpoint was used.
