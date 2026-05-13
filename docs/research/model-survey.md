@@ -146,7 +146,7 @@ Impact on issue #12 architecture:
 
 | Candidate | Supported media | Detector type | License | Maintenance / activity | Setup difficulty | MVP fit |
 | --- | --- | --- | --- | --- | --- | --- |
-| PhotoHolmes | Still images | Image forgery/manipulation forensics toolkit | Apache-2.0 base project; method licenses vary | Local clone latest commit checked: 2025-02-03 | High on native Windows; workable in Docker with fixes | Possible evidence module, not main deepfake detector |
+| PhotoHolmes | Still images | Image forgery/manipulation forensics toolkit | Apache-2.0 base project; method licenses vary | Local clone latest commit checked: 2025-02-03 | High on native Windows; Low on MacOS; workable in Docker with fixes | Possible evidence module, not main deepfake detector |
 | DeepfakeBench | Face-focused images and videos | Benchmark framework with many deepfake detector implementations | CC BY-NC 4.0 | Local clone latest commit checked: 2025-08-20 | High | Strong reference and detector shortlist source; weak direct first-MVP integration |
 | Effort-AIGI-Detection | Still images | CLIP/ViT-based AI-generated image detector | README badge says CC BY-NC 4.0; no local LICENSE file found | Local clone latest commit checked: 2025-07-14 | Medium-high; local smoke test successful after patches | Leading prototype detector adapter, pending license/setup reproducibility |
 | capcheck/ai-human-generated-image-detection | Still images | Hugging Face ViT AI-generated image classifier | Apache-2.0 according to model cards | Parent model README updated about 1 month before review; checkpoint files about 1 year old | Low to medium | Quick integration baseline only; weak reliability evidence from local smoke tests |
@@ -183,6 +183,7 @@ Model type or architecture:
 - Toolkit with multiple implemented image-forensics methods behind a shared interface.
 - Listed methods include Adaptive CFA Net, CAT-Net, DQ, EXIF as Language, FOCAL, Noisesniffer, PSCC-Net, Splicebuster, TruFor, and ZERO.
 - Tested method: DQ, a classic JPEG double-quantization method based on DCT coefficient analysis. DQ produces a heatmap rather than a final real/fake label.
+- Tested method: CAT-Net. Also produces a heatmap.
 
 License:
 
@@ -192,6 +193,7 @@ License:
 Setup difficulty:
 
 - Native Windows: high. Local install failed because `jpegio==0.2.8` could not build with Microsoft Visual C++.
+- MacOS: easy on Tahoe (26.3.1) with M2 chips. `uv sync` successfully built a virtual environment from the `pyproject.toml` file, and after changing line 109 of `src/photoholmes/methods/base.py` to `weights_only=False`, the unpickling errors stopped and the CAT-Net CLI ran successfully.
 - Docker/Linux: workable, but not plug-and-play. A successful DQ run used `python:3.10-slim`, additional OpenCV/JPEG system packages, and `numpy<2`.
 - Practical implication: a contributor-friendly MVP integration would likely need a maintained Dockerfile or pinned dependency setup.
 
@@ -200,6 +202,8 @@ Hands-on result:
 - DQ successfully ran in Docker on the PhotoHolmes sample JPEG.
 - Output generated: `test_jpeg_image_dq_heatmap.png`.
 - The heatmap highlighted regions with stronger JPEG compression-pattern evidence, mostly around object boundaries and high-detail areas.
+- MacOS setup is straightforward.
+- CAT-Net ran on MacOS and produced a strong heatmap indicating an image splice.
 
 Strengths:
 
