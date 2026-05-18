@@ -4,23 +4,54 @@ Status: Draft for issue #8
 
 Goal: identify open-source or publicly documented detector/tool candidates that could support the first media verification MVP. This survey should avoid treating any model output as a truth verdict. Detector outputs should be framed as evidence signals with clear limitations.
 
-## Current Recommendation
+## Table of Contents
+* [Current Recommendation](#current-recommendation)
+* [Other Detectors](#other-detectors)
+* [Architecture Implications For Issue #12](#architecture-implications-for-issue-12)
+* [Working Conclusion Before Paper Review](#working-conclusion-before-paper-review)
+* [DeepfakeBench Paper Review Impact](#deepfakebench-paper-review-impact)
+* [Contributor Literature Notes From Jon](#contributor-literature-notes-from-jon)
+* [Detector Summary Table](#detector-summary-table)
+* [Candidate Details](#candidate-details)
+* [PhotoHolmes](#photoholmes)
+* [DeepfakeBench](#deepfakebench)
+* [Effort-AIGI-Detection](#effort-aigi-detection)
+* [capcheck/ai-human-generated-image-detection](#capcheckai-human-generated-image-detection)
+* [SadraCoding/SDXL-Deepfake-Detector](#sadracodingsdxl-deepfake-detector)
+* [c2patool / c2pa-rs](#c2patool--c2pa-rs)
 
-PhotoHolmes is worth keeping in the candidate pool as an image-forensics evidence module, especially for educational exploration of heatmap-style evidence. It should not be treated as the main MVP detector unless the team is willing to own Docker-based packaging and careful result wording.
 
-DeepfakeBench is useful as a detector landscape and benchmark reference. It should not be treated as the first integration target unless the team separately commits to dataset, weights, GPU/container setup, and license review.
+## Current Recommendations
 
-Effort is the strongest direct detector-adapter candidate inspected so far because it has a documented one-image/folder inference demo, checkpoints for both face deepfake detection and broader AI-generated image detection, and a successful local GenImage smoke test. Its main blockers are licensing and reproducible setup.
+**Detector Recommendation:** [Effort](#effort-aigi-detection) is the strongest direct detector-adapter candidate inspected so far because it has a documented one-image/folder inference demo, checkpoints for both face deepfake detection and broader AI-generated image detection, and a successful local GenImage smoke test. Its main blockers are licensing and reproducible setup.
 
-The Hugging Face CapCheck model is the easiest quick-baseline candidate inspected so far because it uses the standard Transformers image-classification path and appears Apache-2.0 licensed. Its main weakness is weaker training-data transparency and likely concept drift. Tiny local smoke tests ran successfully, but it classified all user-provided examples as `human`, including AI-generated face and non-face examples, so it should be treated as an integration baseline rather than a reliability baseline.
+**Architecture Recommendation:** Local async worker MVP.
 
-A short Hugging Face search sweep found related or comparable image classifiers, including `capcheck/ai-image-detection`, `VilaVision/AIgeneratedimagedetection`, and `AashishKumar/AIVisionGuard-v2`. Those results reinforce that Hugging Face image classifiers are technically easy baseline candidates, but most inspected options are CIFake-centered or weakly documented and do not clearly displace CapCheck.
+* Frontend creates job; API stores job metadata; local worker runs adapters; UI polls for report.
+* The architecture should not hard-code the MVP around one detector. The safer design is a media-analysis pipeline with pluggable evidence adapters and a report aggregator.
+* Design the UI/report around uncertainty: show evidence cards, caveats, and "what was checked," rather than a single real/fake badge.
 
-A second Hugging Face search for deepfake-focused image classifiers found `SadraCoding/SDXL-Deepfake-Detector` as a stronger face-specific candidate on paper. Local smoke tests lowered confidence because it classified every tested file as `human`, including the AI face example. Keep it only as a face-focused research candidate pending controlled aligned-face-crop testing; do not treat it as the general MVP baseline.
+See [here](#architecture-implications-for-issue-12) for further discussion.
 
-c2patool is not a detector, but it is a strong adjacent evidence tool for provenance/content credentials. It should be considered for the media verification report, but separated from model-only detector recommendations.
+[Back to Top](#table-of-contents)
+
+## Other Detectors
+
+**PhotoHolmes:** worth keeping in the candidate pool as an image-forensics evidence module, especially for educational exploration of heatmap-style evidence. It should not be treated as the main MVP detector unless the team is willing to own Docker-based packaging and careful result wording.
+
+**DeepfakeBench:** useful as a detector landscape and benchmark reference. It should not be treated as the first integration target unless the team separately commits to dataset, weights, GPU/container setup, and license review.
+
+**The Hugging Face CapCheck model:** is the easiest quick-baseline candidate inspected so far because it uses the standard Transformers image-classification path and appears Apache-2.0 licensed. Its main weakness is weaker training-data transparency and likely concept drift. Tiny local smoke tests ran successfully, but it classified all user-provided examples as `human`, including AI-generated face and non-face examples, so it should be treated as an integration baseline rather than a reliability baseline.
+
+**capcheck/ai-human-generated-image-detection:** A short Hugging Face search sweep found related or comparable image classifiers, including `capcheck/ai-image-detection`, `VilaVision/AIgeneratedimagedetection`, and `AashishKumar/AIVisionGuard-v2`. Those results reinforce that Hugging Face image classifiers are technically easy baseline candidates, but most inspected options are CIFake-centered or weakly documented and do not clearly displace CapCheck.
+
+**SadraCoding/SDXL-Deepfake-Detector:** A second Hugging Face search for deepfake-focused image classifiers found `SadraCoding/SDXL-Deepfake-Detector` as a stronger face-specific candidate on paper. Local smoke tests lowered confidence because it classified every tested file as `human`, including the AI face example. Keep it only as a face-focused research candidate pending controlled aligned-face-crop testing; do not treat it as the general MVP baseline.
+
+**c2patool:** is not a detector, but it is a strong adjacent evidence tool for provenance/content credentials. It should be considered for the media verification report, but separated from model-only detector recommendations.
 
 This survey now satisfies the "at least 3 candidates" acceptance criterion. The recommendation should stay provisional until the team reviews licenses, confirms checkpoint terms, fills in the local image source log, and repeats follow-up tests on a larger source-labeled image set.
+
+[Back to Top](#table-of-contents)
 
 ## Architecture Implications For Issue #12
 
@@ -60,6 +91,8 @@ Suggested issue #12 design question:
 
 > What is the smallest walking skeleton that accepts an image, creates an analysis job, runs one model adapter plus one metadata/provenance placeholder, and returns a caveated evidence report without permanently storing the uploaded media?
 
+[Back to Top](#table-of-contents)
+
 ## Working Conclusion Before Paper Review
 
 Current hypothesis:
@@ -80,6 +113,8 @@ What the DeepfakeBench paper should help answer:
 - Which metrics and preprocessing choices matter most?
 - Does the paper make any candidate look more practical or less practical for a first MVP baseline?
 - What caveats should we include so the app does not overstate detector reliability?
+
+[Back to Top](#table-of-contents)
 
 ## DeepfakeBench Paper Review Impact
 
@@ -103,6 +138,8 @@ Paper lessons to carry into the MVP:
 - Augmentation and compression choices can help or hurt depending on detector and dataset.
 - Backbone and pretraining choices materially affect detector performance.
 - Detector output should be framed as an evidence signal, not a proof of real/fake status.
+
+[Back to Top](#table-of-contents)
 
 ## Contributor Literature Notes From Jon
 
@@ -142,7 +179,9 @@ Impact on issue #12 architecture:
 - Use existing pretrained detectors for the first MVP rather than planning to train a new detector.
 - Make room for future dataset/evaluation work without blocking the initial walking skeleton.
 
-## Summary Table
+[Back to Top](#table-of-contents)
+
+## Detector Summary Table
 
 | Candidate | Supported media | Detector type | License | Maintenance / activity | Setup difficulty | MVP fit |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -153,7 +192,11 @@ Impact on issue #12 architecture:
 | SadraCoding/SDXL-Deepfake-Detector | Face still images/crops | Hugging Face face-focused AI-generated/deepfake detector | MIT according to model card and license file | Hugging Face page showed latest README update about 3 months before review | Medium | Face-focused research candidate only; not recommended as baseline until controlled face-crop tests pass |
 | c2patool / c2pa-rs | Images, video, audio, PDF read-only, C2PA sidecars | Provenance/content-credentials tool, not a detector | MIT OR Apache-2.0 for c2pa-rs | Active toolchain moved to `contentauth/c2pa-rs`; older `contentauth/c2patool` repo is archived | Low to medium | Strong adjacent evidence signal; not a model baseline |
 
+[Back to Top](#table-of-contents)
+
 ## Candidate Details
+
+Following are detailed notes on the various detectors.
 
 ### PhotoHolmes
 
@@ -202,11 +245,11 @@ Hands-on result:
 - DQ successfully ran in Docker on the PhotoHolmes sample JPEG.
 - Output generated: `test_jpeg_image_dq_heatmap.png`.
 - The heatmap highlighted regions with stronger JPEG compression-pattern evidence, mostly around object boundaries and high-detail areas.
-- MacOS setup is straightforward.
 - CAT-Net ran on MacOS and produced a strong heatmap indicating an image splice.
 
 Strengths:
 
+- MacOS setup is straightforward.
 - Image-first, matching the current image-media MVP direction.
 - Provides a CLI path for running a method on one image.
 - Can output heatmap-style evidence that could map to an evidence-card UI.
@@ -239,6 +282,8 @@ Open questions:
 - Can the output be explained clearly to non-expert users?
 - Is heatmap evidence useful for the MVP, or would it distract from a simpler first demo?
 - Would the team accept Docker as the expected environment for this component?
+
+[Back to Top](#table-of-contents)
 
 ### DeepfakeBench
 
@@ -320,6 +365,8 @@ Open questions:
 - Do pretrained weights have separate licensing or use restrictions?
 - Is Effort a better standalone candidate than the benchmark framework itself?
 - Should we treat DeepfakeBench as evaluation infrastructure rather than app infrastructure?
+
+[Back to Top](#table-of-contents)
 
 ### Effort-AIGI-Detection
 
@@ -412,6 +459,8 @@ Open questions:
 - What are the checkpoint license and usage terms?
 - Which checkpoint best matches the MVP: FaceForensics++, GenImage, or Chameleon?
 - How should the UI phrase a fake probability without implying certainty?
+
+[Back to Top](#table-of-contents)
 
 ### capcheck/ai-human-generated-image-detection
 
@@ -506,6 +555,8 @@ Open questions:
 - Is a simple Hugging Face classifier good enough as a baseline if the report language is careful?
 - Should this be used only as a low-cost comparison point against Effort?
 
+[Back to Top](#table-of-contents)
+
 ### SadraCoding/SDXL-Deepfake-Detector
 
 Primary source:
@@ -599,6 +650,8 @@ Open questions:
 - Are the dataset and model license terms sufficient for the project's future use cases?
 - Does it outperform CapCheck on face-focused examples?
 
+[Back to Top](#table-of-contents)
+
 ### c2patool / c2pa-rs
 
 Primary sources:
@@ -677,3 +730,5 @@ Open questions:
 - Should "no C2PA credentials found" appear as a report field?
 - Should trust-list validation be in scope for the first demo?
 - Should provenance tools live in this model survey or a separate evidence-signal survey?
+
+[Back to Top](#table-of-contents)
