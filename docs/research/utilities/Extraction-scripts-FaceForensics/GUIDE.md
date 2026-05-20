@@ -1,14 +1,13 @@
-# FaceForensics++ Frame Extraction & Upload Pipeline
+# FaceForensics++ Frame Extraction & Sharding Pipeline
 
-This guide explains how to use the three scripts in this directory to extract frames from FaceForensics++ videos, organize them into shards, and upload them to Hugging Face Hub.
+This guide explains how to use the two scripts in this directory to extract frames from FaceForensics++ videos and organize them into shards.
 
 ## Overview
 
-The pipeline consists of three stages:
+The pipeline consists of two stages:
 
 1. **Frame Extraction** (`extractor.py`) - Extract individual frames from MP4 videos
 2. **Frame Sharding** (`sharding.py`) - Organize extracted frames into tar archives
-3. **Hugging Face Upload** (`upload_to_hf.py`) - Upload shards to Hugging Face Hub dataset repository
 
 ---
 
@@ -20,7 +19,6 @@ Before running the scripts, ensure your directory structure looks like this:
 .
 ├── extractor.py
 ├── sharding.py
-├── upload_to_hf.py
 ├── deepfake_dataset/                    # Input video files (must exist)
 │   └── FaceForensics++_C23/
 │       ├── DeepFakeDetection/           # Video files (.mp4)
@@ -55,19 +53,7 @@ Before running the scripts, ensure your directory structure looks like this:
 Install required Python packages:
 
 ```bash
-pip install opencv-python numpy tqdm huggingface-hub
-```
-
-For Hugging Face authentication:
-
-```bash
-huggingface-cli login
-```
-
-Or set the `HF_TOKEN` environment variable:
-
-```bash
-export HF_TOKEN="your_huggingface_token_here"
+pip install opencv-python numpy tqdm
 ```
 
 ---
@@ -145,35 +131,6 @@ ff_shards/
 
 ---
 
-### Step 3: Upload to Hugging Face Hub
-
-```bash
-python upload_to_hf.py
-```
-
-**What this does:**
-- Uploads all `.tar` files from `ff_shards/` to Hugging Face Hub
-- Creates/updates a dataset repository at the specified `repo_id`
-- Files are automatically stored using Git LFS (Large File Storage)
-- Uploads to a `data/` subdirectory in the repo
-
-**Configuration** (edit in `upload_to_hf.py`):
-```python
-repo_id = "Rwitobaan/faceforensics-frames-c23"  # Change to your repo
-```
-
-**Before uploading:**
-1. Create a dataset repository on Hugging Face Hub (https://huggingface.co/new)
-2. Authenticate locally: `huggingface-cli login`
-3. Ensure you have write permissions to the repo
-
-**Upload speed:**
-- Depends on internet connection and file size
-- Large files (10+ GB) may take several hours
-- Resume is automatic if upload is interrupted
-
----
-
 ## Complete Workflow Example
 
 ### 1. Verify folder structure
@@ -206,18 +163,6 @@ ls -lh ff_shards/
 du -sh ff_shards/  # Check total shard size
 ```
 
-### 6. Authenticate with Hugging Face
-```bash
-huggingface-cli login
-# Or: export HF_TOKEN="hf_your_token_here"
-```
-
-### 7. Upload to Hugging Face
-```bash
-python upload_to_hf.py
-# Upload time depends on internet speed and total file size
-```
-
 ---
 
 ## Troubleshooting
@@ -227,24 +172,10 @@ python upload_to_hf.py
 pip install opencv-python
 ```
 
-### Issue: "No module named 'huggingface_hub'"
-```bash
-pip install huggingface-hub
-```
-
 ### Issue: Extraction is very slow
 - Check CPU usage: `top` or `htop` on Linux/Mac
 - Reduce number of parallel workers (edit `ProcessPoolExecutor()` in `extractor.py`)
 - Move `ff_samples/` to faster storage if using network drives
-
-### Issue: "Permission denied" during upload
-- Ensure you're authenticated: `huggingface-cli whoami`
-- Verify you have write access to the repo
-- Check token permissions (must have `write` access)
-
-### Issue: Upload interrupted
-- Resume by running `python upload_to_hf.py` again
-- Hugging Face will skip already-uploaded files
 
 ### Issue: Out of disk space
 - Enable tar compression in `sharding.py`:
@@ -263,9 +194,6 @@ Typical processing times on a modern system:
 |-------|-------|-------------|------|
 | Extraction | Full FaceForensics++ (7 classes) | ~150-200 GB frames | 2-4 hours |
 | Sharding | 150-200 GB frames | ~120-180 GB tars | 1-2 hours |
-| Upload | 7 tar files | - | 4-12 hours* |
-
-*Upload time varies based on internet connection (typically 10-50 Mbps)
 
 ---
 
@@ -299,13 +227,6 @@ with tarfile.open(shard_path, "w:gz") as tar:  # Gzip compression
 # or "w:bz2" for bzip2 compression (slower but better compression)
 ```
 
-### Custom Hugging Face Repo
-
-Edit `upload_to_hf.py`:
-```python
-repo_id = "your-username/your-dataset-name"
-```
-
 ---
 
 ## Expected Output
@@ -319,11 +240,6 @@ After completing all steps, you'll have:
 2. **Local tar shards** (~120-180 GB):
    - `ff_shards/` with 7 `.tar` files (one per class)
    - Each tar file contains all frames for that class
-
-3. **Hugging Face dataset**:
-   - Public or private dataset repository
-   - `data/` directory containing 7 tar files
-   - Accessible via `huggingface_hub` library for downloads
 
 ---
 
